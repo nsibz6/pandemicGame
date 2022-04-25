@@ -2,15 +2,17 @@ import random
 from game_data import all_cities
 
 
-# player deck class, city cards & event cards. Epidemic cards created seperately as they need to be added to the deck at a later stage in play_pandemic module.
+# player deck class, city cards & event cards. Epidemic cards created separately to be added to the deck later.
 
-class Player_Deck:
+class playerDeck:
     def __init__(self, all_cities):
         self.player_deck = {city: colour for colour, cities in all_cities.items() for city in cities}
         self.shuffled_deck = [city for colour, cities in all_cities.items() for city in cities]
         self.discard_pile = []
-        new_event_deck = Event_Cards()
+        new_event_deck = eventCards()
         self.player_deck.update(new_event_deck.event_deck)
+        self.shuffled_deck += [event_card for event_card in new_event_deck.event_deck.keys()]
+        random.shuffle(self.shuffled_deck)
 
     def view_deck(self):
         for card in self.shuffled_deck:
@@ -25,24 +27,19 @@ class Player_Deck:
 
 # Event cards - single use cards that have special abilities
 
-class Event_Cards:
+class eventCards:
     def __init__(self):
-        self.event_deck = {}
-        self.event_deck['Resilient Population'] = Resilient_Population()
-        self.event_deck['One Quiet Night'] = One_Quiet_Night()
-        self.event_deck['Airlift'] = Airlift()
-        self.event_deck['Forecast'] = Forecast()
-        self.event_deck['Government Grant'] = Government_Grant()
-
+        self.event_deck = {'Resilient Population': resilientPopulation(), 'One Quiet Night': oneQuietNight(),
+                           'Airlift': airlift(), 'Forecast': forecast(), 'Government Grant': governmentGrant()}
 
 # Removes one world card from the game; therefore city can no longer be flipped during infection phase.
 
-class Resilient_Population:
-    def use_card(self, discard_pile, card_to_discard=None):
+class resilientPopulation:
+    def use_card(self, discard_pile, out_of_the_game, card_to_discard=None):
         if not discard_pile:
             return print(
                 'You can only use this card if there are cards in the infection discard pile:\n\nPlease take another action.')
-        if card_to_discard == None:
+        if not card_to_discard:
             print('You may choose to permanently remove one of the following infection cards from the game:\n')
             for card in discard_pile:
                 print(card)
@@ -54,12 +51,12 @@ class Resilient_Population:
             if card_to_discard not in discard_pile:
                 print('Invalid entry! Please select a card in the infection discard pile.')
         print('You have discarded {0}!'.format(card_to_discard))
-        infection_deck.out_of_the_game.append(discard_pile.remove(card_to_discard))
+        out_of_the_game.append(discard_pile.remove(card_to_discard))
 
 
 # Prevents any cards being flipped for one infection phase.
 
-class One_Quiet_Night:
+class oneQuietNight:
     def use_card(self, game_status):
         game_status.infect_city_status = False
         print('\n\nYou have used One Quiet Night, no cards will be drawn during the next infection phase!')
@@ -68,8 +65,8 @@ class One_Quiet_Night:
 # Move a player from any city to any other city.
 # Currently when use card called by player, is not called with player parameter so is getting error message.
 
-class Airlift:
-    def use_card(self, player):
+class airlift:
+    def use_card(self, player, world_map):
         if player.player_name in world_map.all_cities[player.current_city].players_in_city:
             world_map.all_cities[player.current_city].players_in_city.pop(player.player_name)
             print('Please choose a valid city to move to:')
@@ -84,13 +81,13 @@ class Airlift:
 # Look at top 6 world cards and rearrange in order of your choice.
 # Quite a complex algorithm. Look for potential ways to simplify. Have reduced amount of code with respect to informing the player of what order each new card is they are inputting.
 
-class Forecast:
+class forecast:
     # instantiated with empty list to store player's reorder decision
     def __init__(self):
         self.new_order = []
 
     # function to enable player to choose which card to put 1st, 2nd, 3rd, 4th, 5th and 6th
-    def select_new_order(self, infection_deck, temp_top_6):
+    def select_new_order(self, temp_top_6):
         print(
             '\nStarting with the first card you will draw in the infection phase and ending with the 6th card to be drawn, you can now rearrange the top 6 cards\n')
         select_card = None
@@ -138,13 +135,13 @@ class Forecast:
             final_choice = input('\nAre you happy with that order? Input Y for Yes or N for No\n')
             if final_choice not in ('N', 'Y'):
                 print('\nInvalid input, must be Y for Yes or N for No: Please try again:\n')
-        self.final_decision(final_choice, final_amend, infrction_deck)
+        self.final_decision(final_choice, final_amend, infection_deck)
 
 
 # creates research centre anywhere on map
 # Further updates made on the original on Pandemic Decks. Ensure you copy this logic over.
 
-class Government_Grant:
+class governmentGrant:
     def check_city(self, select_city, world_map):
         while select_city in world_map.research_centres.keys() or select_city not in world_map.all_cities:
             select_city = input(
