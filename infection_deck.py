@@ -1,7 +1,7 @@
 import random
 from game_data import all_cities
 
-class Infection_Deck:
+class infectionDeck:
   def __init__(self, all_cities):
     self.infection_cards = {city: colour for colour, cities in all_cities.items() for city in cities}
     self.shuffled_deck = [city for colour, cities in all_cities.items() for city in cities]
@@ -36,6 +36,7 @@ class Infection_Deck:
     return drawn_card
 
 
-# test_deck = Infection_Deck(all_cities)
+test_deck = infectionDeck(all_cities)
 
-# print(test_deck.shuffled_deck)
+print(test_deck.shuffled_deck)
+print(len(test_deck.shuffled_deck))
