@@ -90,6 +90,6 @@ class Map_of_World:
     self.all_cities = {city: City(city, colour, cities, all_cities) for colour, cities in all_cities.items() for city in cities}
     self.game_status = game_status
 
-modern_world = Map_of_World(all_cities, False, infection_rate)
+modern_world = Map_of_World(all_cities, True, infection_rate)
 
 print(modern_world.all_cities)
