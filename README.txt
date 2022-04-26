@@ -1,0 +1,1 @@
+Pandemic, a 2 4 player cooperative boardgame in which players work together to fight against a spreading global pandemic.
